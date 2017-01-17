@@ -92,6 +92,7 @@ module Danger
       @doc = Ox.parse(xml_string)
 
       suite_root = @doc.nodes.first.value == 'testsuites' ? @doc.nodes.first : @doc
+      @package = suite_root.nodes.first['package'] || 'Tests'
       @tests = suite_root.nodes.map(&:nodes).flatten.select { |node| node.value == 'testcase' }
 
       failed_suites = suite_root.nodes.select { |suite| suite[:failures].to_i > 0 || suite[:errors].to_i > 0 }
@@ -131,7 +132,7 @@ module Danger
 
       unless failures.empty? && errors.empty?
         fail('Tests have failed, see below for more information.', sticky: false)
-        message = "### Tests: \n\n"
+        message = "### #{@package}: \n\n"
 
         tests = (failures + errors)
         keys = headers || tests.first.attributes.keys
